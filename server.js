@@ -3,10 +3,10 @@ const app = express()
 const mongoose = require('mongoose')
 const cors = require('cors');
 const bodyparser = require('body-parser')
-const userauth = require('./auth/User')
+const userauth = require('./route/User')
 const Product = require('./route/Productcontroll')
+const cron = require('node-cron');
 const nodemailer = require('nodemailer');
-
 
 const corsorigin = {
     origin: 'http://localhost:3000'
@@ -28,32 +28,40 @@ app.use('/auth', userauth)
 app.use('/product', Product)
 app.use('/search', Product.search)
 
-// const transporter = nodemailer.createTransport({
-//     port: 465,
-//     host: "smtp.gmail.com",
-// });
+cron.schedule('* * * * * * ', () => {
+    // sendMail()
+    console.log("task is running every minute");
 
-// const mailConfigurations = {
-
-//     from: 'aitpavithra@gmail.com',
-
-
-//     to: 'aitpavithra@gmail.com',
-//     subject: 'Sending Email using Node.js',
-
-//     text: 'Hi! There, You know I am using the'
-//         + ' NodeJS Code along with NodeMailer '
-//         + 'to send this email.'
-// };
-
-// transporter.sendMail(mailConfigurations, function (error, info) {
-//     if (error) throw Error(error);
-//     console.log('Email Sent Successfully');
-//     console.log(info);
-// });
-
-
-const port = 5000;
-app.listen(port, () => {
-    console.log(`server is running on port ${port}`);
 })
+
+// async function sendMail() {
+//     const transportmailer = nodemailer.createTransport({
+//         service: 'gmail',
+//         auth: {
+//             user: 'aitpavithra@gmail.com',
+//             pass: 'Pavithra@ait2002'
+//         }
+//     })
+
+//     let mailDetails = await transporter.sendMail({
+//         from,
+//         to,
+//         subject,
+//         text,
+//         html: `<strong>${text}</strong>`,
+//     });
+//         transportmailer.sendMail(mailDetails,
+//             function (err, data) {
+//                 if (err) {
+//                     console.log("Error Occurs", err);
+//                 } else {
+//                     console.log("Email sent successfully",data);
+//                 }
+//             });
+
+//     }
+
+    const port = 5000;
+    app.listen(port, () => {
+        console.log(`server is running on port ${port}`);
+    })
