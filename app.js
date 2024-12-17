@@ -33,6 +33,20 @@ const getProductone = async (id) => {
     const response = await axios.get(`${baseUrl}/find/${id}`);
     return response.data;
 };
+async function getProductsByName(name) {
 
-module.exports = { getdata, getdatas, createProduct, getProductone,  updateProduct, deleteProduct };
+    const response = await axios.get(`${baseUrl}/find`, {
+        params: { name: name }
+    });
+    return {
+        success: true,
+        message: 'Products filtered successfully',
+        data: response.data.data
+    };
+
+}
+
+
+
+module.exports = { getdata, getdatas, createProduct, getProductone, getProductsByName, updateProduct, deleteProduct };
 

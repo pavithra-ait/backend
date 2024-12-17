@@ -7,7 +7,8 @@ const nodemailer = require('nodemailer');
 const connectDB = require('./db/Connection')
 
 const authRoutes = require('./route/User');
-const authproduct = require('./route/Productcontroll')
+const authproduct = require('./route/Productcontroll');
+const { default: axios } = require('axios');
 
 const corsorigin = {
     origin: 'http://localhost:3000'

@@ -11,5 +11,6 @@ router.post('/create', upload.single('image'), ProductController.createdata);
 router.get('/find/:_id', ProductController.indexdata);
 router.put('/update/:id', upload.single('image'), ProductController.putdata);
 router.delete('/remove/:id', ProductController.deletedata);
+router.get('/search',ProductController.searchdata)
 
 module.exports = router;

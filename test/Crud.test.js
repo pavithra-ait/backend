@@ -1,6 +1,6 @@
 const nock = require('nock');
 const { expect } = require('chai');
-const { createProduct, getProductone, updateProduct, deleteProduct } = require('../app');
+const { createProduct, getProductone, getProductsByName, updateProduct, deleteProduct } = require('../app');
 
 describe('CRUD Operations with Image Uploading', () => {
     afterEach(() => {
@@ -131,20 +131,20 @@ describe('CRUD Operations with Image Uploading', () => {
                 id: productId,
                 Name: 'top',
                 Price: 2300,
-                Image: 'upload/1734413297862-Screenshot (38).png',    
+                Image: 'upload/1734413297862-Screenshot (38).png',
             },
         };
 
-      
+
         nock(mockUrl, {
             reqheaders: {
                 accept: 'application/json, text/plain, */*',
-                'user-agent': /axios\/1\.7\.9/, 
+                'user-agent': /axios\/1\.7\.9/,
                 'accept-encoding': 'gzip, compress, deflate, br',
             },
         })
-            .get(`/find/${productId}`) 
-            .reply(200, mockResponse); 
+            .get(`/find/${productId}`)
+            .reply(200, mockResponse);
 
         const result = await getProductone(productId);
         expect(result).to.deep.equal(mockResponse);
@@ -168,8 +168,8 @@ describe('CRUD Operations with Image Uploading', () => {
                 'user-agent': /axios\/1\.7\.9/,
             },
         })
-            .put(`/update/${productId}`, productUpdate) 
-            .reply(200, mockResponse); 
+            .put(`/update/${productId}`, productUpdate)
+            .reply(200, mockResponse);
         const result = await updateProduct(productId, productUpdate);
         expect(result).to.deep.equal(mockResponse);
     });
@@ -187,10 +187,38 @@ describe('CRUD Operations with Image Uploading', () => {
                 'accept-encoding': 'gzip, compress, deflate, br',
             },
         })
-            .delete(`/remove/${productId}`) 
-            .reply(200, mockResponse); 
+            .delete(`/remove/${productId}`)
+            .reply(200, mockResponse);
 
         const result = await deleteProduct(productId);
         expect(result).to.deep.equal(mockResponse);
     });
+    it('should mock filtering products by name', async () => {
+        const productName = 'top';
+        const mockResponse = {
+            success: true,
+            message: 'Products filtered successfully',
+            data: [
+                { productId: '1', name: 'top', category: 'Dress' },
+                { productId: '2', name: 'Laptop Pro', category: 'Electronics' }
+            ]
+        };
+        nock(mockUrl, {
+            reqheaders: {
+                accept: 'application/json, text/plain, */*',
+                'user-agent': /axios\/1\.7\.9/,
+                'accept-encoding': 'gzip, compress, deflate, br',
+            },
+        })
+            .get('/find')
+            .query({ name: productName })
+            .reply(200, mockResponse);
+
+
+        const result = await getProductsByName(productName);
+
+        
+        expect(result).to.deep.equal(mockResponse);
+    });
 });
+
