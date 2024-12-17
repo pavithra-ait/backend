@@ -1,45 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const product = require('../Schema/Product');
-const multer = require('multer');
-const productdata = require('../Product/Productlist');
+const upload = require('../auth/Product')
+const ProductController = require('../auth/Productlist');
+const path = require('path')
 
-exports.search = (req, res) => {
-    const filterType = req.query.Product_Title;
-    product.find({ Product_Title: filterType }, function (err, product) {
-        if (err) {
-            console.log(err)
-        } else {
-            res.json(product);
-        }
-    })
-};
 
-const Storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'upload/')
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname)
-    }
-})
-
-const upload = multer({ storage: Storage })
-
-class productController extends productdata {
-    constructor(model) {
-        super()
-        this.model = model;
-
-        // All the routes declared here!
-        router.get('/find', this.get);
-        router.get('/find/:_id', this.index);
-        router.post('/create', upload.single('image'), this.create);
-        router.put('/update/:id', upload.single('image'), this.put);
-        router.delete('/remove/:_id', this.delete);
-    }
-}
-
-new productController(product);
+router.use('/view', express.static(path.join(__dirname, 'upload'))); 
+router.get('/find',  ProductController.getdata);
+router.post('/create', upload.single('image'), ProductController.createdata);
+router.get('/find/:_id', ProductController.indexdata);
+router.put('/update/:id', upload.single('image'), ProductController.putdata);
+router.delete('/remove/:id', ProductController.deletedata);
 
 module.exports = router;

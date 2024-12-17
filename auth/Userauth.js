@@ -1,63 +1,55 @@
-const bcrypt = require('bcrypt');
+const User = require('../Models/User');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt')
 
-class user {
-    contructor() { }
+exports.register = async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
 
-    get = async (req, res) => {
-        const token = req.headers.authorization;
-        const decoded = await jwt.verify(token, 'UsEr', (err) => {
-            if (err) return res.sendStatus(403);
-            next();
-        });
-        const Userid = decoded.userId
-        const data = await this.model.find(Userid)
-        return res.status(200).json(this.apiSend(data))
 
-    }
-    create = async (req, res) => {
-        const { User_Name, User_Email, User_Password } = req.body
-        const hashpw = await bcrypt.hash(User_Password, 10)
-
-        const data = await this.model.create({
-            User_Name,
-            User_Email,
-            User_Password: hashpw
-        })
-        return res.status(200).json(this.apiSend(data))
-    }
-    creates = async (req, res) => {
-        const { User_Email } = req.body
-
-        const User = await this.model.findOne(User_Email)
-
-        if (!User) {
-            res.send('invalid user')
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
         }
 
-        const Pw = await bcrypt.compareSync(req.body.User_Password, User.User_Password)
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await User.create({ name, email, password: hashedPassword });
 
-        if (!Pw) {
-            res.send('invalid PASSSWORD')
+        res.status(201).json({ message: 'User registered successfully', newUser });
+    } catch (error) {
+        console.error('Error during registration:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
 
-        }
+exports.login = async (req, res) => {
+    const { name, password } = req.body;
 
-        const token = await jwt.sign({
-            userId: this.model._id
-        }, "UsEr")
 
-        r
-        return res.status(200).json(this.apiSend(token))
+    const user = await User.findOne({ name });
+    if (!user) {
+        return res.status(400).json({ message: 'User not found' });
     }
 
-
-    apiSend = (json) => {
-        return {
-            data: json
-        }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+        return res.status(400).json({ message: 'Invalid password' });
     }
+
+    const token = jwt.sign({
+        id: user._id
+    }, 'CrUd');
+    return res.status(200).json({ token });
+};
+
+exports.getdata = async (req, res) => {
+    const token = req.header('Authorization').split(' ')[1];
+    const decoded = await jwt.verify(token, 'CrUd');
+
+    const data = User.findOne(decoded.id)
+    return res.status(200).json(data);
 
 }
 
-module.exports = user;
+
+
 
