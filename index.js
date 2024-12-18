@@ -5,24 +5,24 @@ const bodyparser = require('body-parser')
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 const connectDB = require('./db/Connection')
-
 const authRoutes = require('./route/User');
 const authproduct = require('./route/Productcontroll');
-const { default: axios } = require('axios');
+
+connectDB()
 
 const corsorigin = {
     origin: 'http://localhost:3000'
 }
 app.use(cors(corsorigin))
-app.use(bodyparser.urlencoded({ extended: true }))
+app.use(bodyparser.json());
+app.use(express.urlencoded({ extended: true }))
+const path = require('path')
 
-
-connectDB()
 
 
 app.use('/api/auth', authRoutes);
 app.use('/api/product', authproduct);
-app.use(express.json());
+app.use('/view', express.static(path.join(__dirname, 'uploads'))); 
 
 function sendmail() {
     const transportmailer = nodemailer.createTransport({
@@ -51,7 +51,7 @@ function sendmail() {
 }
 
 cron.schedule('*/180 * * * * * ', () => {
-    sendmail()
+    // sendmail()
     console.log("task is running every minute");
 })
 

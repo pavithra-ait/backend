@@ -22,23 +22,35 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-    const { name, password } = req.body;
+    try {
+        const { name, password} = req.body;
 
+        const user = await User.findOne({ name });
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
+        }
 
-    const user = await User.findOne({ name });
-    if (!user) {
-        return res.status(400).json({ message: 'User not found' });
+        // Validate input
+        if (!password || !user.password) {
+            return res.status(400).json({ error: 'Password and hash are required' });
+        }
+
+     
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (isMatch) {
+            res.status(200).json({ message: 'Login successful' });
+        } else {
+            res.status(401).json({ error: 'Invalid credentials' });
+        }
+        const token = jwt.sign({
+            id: user._id
+        }, 'CrUd');
+        return res.status(200).json({ token });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
     }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-        return res.status(400).json({ message: 'Invalid password' });
-    }
-
-    const token = jwt.sign({
-        id: user._id
-    }, 'CrUd');
-    return res.status(200).json({ token });
 };
 
 exports.getdata = async (req, res) => {

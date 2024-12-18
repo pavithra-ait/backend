@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('fs').promises;
 const Productdata = require('../Models/Product');
 
 
@@ -6,15 +6,15 @@ class ProductController {
     async indexdata(req, res) {
         try {
             const product = await Productdata.findById(req.params._id);
-        
+
             if (!product) {
-              return res.status(404).json({ error: 'Product not found.' });
+                return res.status(404).json({ error: 'Product not found.' });
             }
-        
+
             res.status(200).json(product);
-          } catch (error) {
+        } catch (error) {
             res.status(500).json({ error: error.message });
-          }
+        }
     }
 
     async getdata(req, res) {
@@ -36,7 +36,8 @@ class ProductController {
             const newProduct = await Productdata.create({
                 Name,
                 Price,
-                Image: req.file.path,
+                File_Path: req.file.path,
+                File_name: req.file.filename
             });
 
             res.status(201).json(newProduct);
@@ -44,44 +45,26 @@ class ProductController {
             res.status(500).json({ error: error.message });
         }
     }
-    async putdata(req, res) {
+    
+
+    async deletedata(req, res) {
         try {
-            const { Name, Price } = req.body;
+            const { id } = req.params;
+            const product = await Productdata.findByIdAndDelete(id);
 
-            const updateData = { Name, Price };
-            const product = await Productdata.findById(req.params.id);
-            fs.unlinkSync(product.Image)
-           
-
-            const updatedProduct = await Productdata.findByIdAndUpdate(req.params.id, updateData);
-
-            if (!updatedProduct) {
+            if (!product) {
                 return res.status(404).json({ error: 'Product not found.' });
             }
 
-            res.status(200).json(updatedProduct);
+            res.status(200).json({ message: 'Product deleted successfully.' });
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
     }
-
-    async deletedata(req, res) {
-        try {
-            const deletedProduct = await Productdata.findByIdAndDelete(req.params.id);
-        
-            if (!deletedProduct) {
-              return res.status(404).json({ error: 'Product not found.' });
-            }
-        
-            res.status(200).json({ message: 'Product deleted successfully.' });
-          } catch (error) {
-            res.status(500).json({ error: error.message });
-          }
-    }
     async searchdata(req, res) {
 
         try {
-            const { Name } = req.query; 
+            const { Name } = req.query;
             let products;
 
             if (title) {
