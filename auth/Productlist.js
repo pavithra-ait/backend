@@ -27,17 +27,17 @@ class ProductController {
     }
     async createdata(req, res) {
         try {
-            const { Name, Price } = req.body;
-
+        
             if (!req.file) {
                 return res.status(400).json({ error: 'Image file is required.' });
             }
 
             const newProduct = await Productdata.create({
-                Name,
-                Price,
-                File_Path: req.file.path,
-                File_name: req.file.filename
+                Name:req.body.Name,
+                Price:req.body.Price,
+                File_name: req.file.filename,
+                Dates:req.body.Dates,
+                Stock:req.body.Stock
             });
 
             res.status(201).json(newProduct);
@@ -63,17 +63,26 @@ class ProductController {
     }
     async searchdata(req, res) {
 
-        try {
-            const { Name } = req.query;
-            let products;
+        const { Name, Dates,Stock } = req.query;
 
-            if (title) {
-                products = await Productdata.find({
-                    title: new RegExp(Name, 'i'),
-                });
-            }
-            res.json(products);
-        } catch (err) {
+        const filter = {};
+      
+        if (Name) {
+          filter.Name = { $regex: Name, $options: 'i' };
+        }
+        
+        if (Dates) {
+          filter.Dates = new Date(Dates);
+        }
+        if(Stock) {
+            filter.Stock == 'Stock'
+        }
+       
+        try {
+          const stocks = await Productdata.find(filter);
+          res.status(200).json(stocks);
+        } 
+        catch (err) {
             console.error(err);
             res.status(500).send('Error fetching products');
         }
